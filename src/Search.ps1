@@ -28,7 +28,7 @@ function Search-PdfFolder {
     )
     try{
         Register-ITextSharpLib
-        
+
         $pdfs = (gci $Path -Filter '*.pdf' -File).Fullname
         
 
@@ -45,7 +45,7 @@ function Search-PdfFolder {
             $TotalMatches = 0
          
             for($page = 1; $page -le $reader.NumberOfPages; $page++) {
-
+                $LineNumber = 1
                 # set the page text
                 $pageText = [iTextSharp.text.pdf.parser.PdfTextExtractor]::GetTextFromPage($reader,$page).Split([char]0x000A)
                 $show = $false
@@ -53,11 +53,11 @@ function Search-PdfFolder {
                 ForEach($val in $pageText){
                     if($val -match $Pattern) {
                         $TotalMatches++
-
-                        Write-Host "$val" -f DarkYellow
-                        $Array = $val.Split(' ')
-                        
+                        $LogLines = "P{0}:{1}" -f $page, $LineNumber
+                        Write-Host "$LogLines " -f DarkYellow -NoNewLine
+                        Write-Host "$val"
                     }
+                    $LineNumber++
                 }             
             }
 
