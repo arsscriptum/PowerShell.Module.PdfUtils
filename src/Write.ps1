@@ -8,6 +8,31 @@
 #║   Copyright (C) Luminator Technology Group.  All rights reserved.              ║
 #╚════════════════════════════════════════════════════════════════════════════════╝
 
+function Write-PdfCryptoFile {
+
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$Path,
+        [Parameter(Mandatory=$true,Position=1)]
+        [string]$Text
+    )
+    try{
+        Register-ITextSharpLib
+        $pdf = [iTextSharp.text.Document]::new()
+        $Null = New-PdfDocument -Document $pdf -File "$Path" -TopMargin 20 -BottomMargin 20 -LeftMargin 20 -RightMargin 20 -Author "Guillaume Plante"
+        $pdf.Open()
+      
+        $ret = Add-TitleToPdf -Document $pdf -Text "Crypto Data" -Color "Red" -Centered
+        $ret = Add-TextToPdf -Document $pdf -Text "$Text"
+    
+        $pdf.Close()
+    }
+    catch{
+        Write-Error $_
+    }
+}
+
 
 function Write-PdfFile {
 
@@ -25,7 +50,7 @@ function Write-PdfFile {
         $pdf.Open()
       
         Add-TitleToPdf -Document $pdf -Text "This Is the Title Test" -Color "Blue" -Centered
-        Add-TextToPdf -Document $pdf -Text "This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph"
+        Add-TextToPdf -Document $pdf -Text "$Text"
     
         $pdf.Close()
     }
@@ -164,8 +189,8 @@ function Test-CreatePdf{
     New-PdfDocument -Document $pdf -File "C:\Tmp\Test.pdf" -TopMargin 20 -BottomMargin 20 -LeftMargin 20 -RightMargin 20 -Author "Guillaume Plante"
     $pdf.Open()
     # Add-Image -Document $pdf -File "$Flogo" -Centered
-    Add-TitleToPdf -Document $pdf -Text "This Is the Title Test" -Color "Blue" -Centered
-    Add-TextToPdf -Document $pdf -Text "This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph"
+    $Ret = Add-TitleToPdf -Document $pdf -Text "THIS IS THE STORY OF THE LONELY VAGABOND" -Color "Magenta" -Centered
+    $Ret = Add-TextToPdf -Document $pdf -Text "This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph,This would serve as a short paragraph"
     #Add-Table -Document $pdf -Dataset @('Name', "$first", "Login", "$userprinc", "Email", "$SamAccountName", "Password", "String") -Cols 2 -Centered
     Add-TextToPdf -Document $pdf -Text "We could use this space to show the Help Desk Ticket System"
     $pdf.Close()
