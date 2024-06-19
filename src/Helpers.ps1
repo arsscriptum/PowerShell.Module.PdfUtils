@@ -43,7 +43,12 @@ function Register-ITextSharpLib{
         $dllfn = $dll.Fullname
         $dllname = $dll.Name
         Write-Verbose "Importing $dllname"
-        Add-Type -Path "$dllfn"
+        try{
+            Add-Type -Path "$dllfn" -ErrorAction Ignore | Out-Null    
+        }catch{
+            
+        }
+        
     }
 }
 
