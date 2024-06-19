@@ -7,20 +7,47 @@ A module providing somem pdf related functionalities in PowerShell
 Guillaume Plante
 
 
-function Test-PdfCipher {
 
-    $DataFile = "D:\Scripts\TextFile.txt"
+    $File1 = "D:\Scripts\AutoHotkey\RemapKeys.ahk"
+    $File2 = "D:\Scripts\AutoHotkey\MyShortcuts.ahk"
+
+
+function Protect-FileToPdfCipher {
+    [CmdletBinding(SupportsShouldProcess)]
+    Param(
+        [Parameter(Mandatory=$True, Position=0)]
+        [ValidateScript({Test-Path $_})]
+        [string]$Path
+    )
+
     $OutFile =  "$ENV:Temp\Temp.txt"
 
-    $Data = Protect-FileToCipherBlock -Path $DataFile | Out-String
+    $Data = Protect-FileToCipherBlock -Path $Path | Out-String
 
-    $PdfFile = "D:\Scripts\TextFile.pdf"
+    $Basename = Get-Item $Path | Select -ExpandProperty Basename
+    $DirectoryName = Get-Item $Path | Select -ExpandProperty DirectoryName
+    $PdfFile = "{0}\{1}.pdf" -f $DirectoryName, $Basename
+
+    Remove-Item -Path $PdfFile -Force -ErrorAction Ignore | Out-Null
+
     Write-PdfCryptoFile -Path $PdfFile -Text $Data
-    [iTextSharp.text.pdf.PdfReader]$reader  = [iTextSharp.text.pdf.PdfReader]::new($PdfFile)
+    Write-Host "Wrote file: $PdfFile . To Decrypt, use Unprotect-FileToPdfCipher"
+}
+
+
+function Unprotect-FileToPdfCipher {
+    [CmdletBinding(SupportsShouldProcess)]
+    Param(
+        [Parameter(Mandatory=$True, Position=0)]
+        [ValidateScript({Test-Path $_})]
+        [string]$Path
+    )
+    [iTextSharp.text.pdf.PdfReader]$reader  = [iTextSharp.text.pdf.PdfReader]::new($Path)
     $text = ""
     for ($i = 1; $i -le $reader.NumberOfPages; $i++) {
         $text = $text + [iTextSharp.text.pdf.parser.PdfTextExtractor]::GetTextFromPage($reader, $i)
     }
 
-    Unprotect-CipherBlockToFile -Content $text
+    $Content = Unprotect-CipherBlockToFile -Content $text
+    $Content
 }
